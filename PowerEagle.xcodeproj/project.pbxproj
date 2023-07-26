@@ -17,6 +17,7 @@
 		9354853C23E7C50200711E27 /* x2powercontrol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 9354853A23E7C50200711E27 /* x2powercontrol.cpp */; };
 		939F4F2D1EE1EE6300E26EED /* IOKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 939F4F2C1EE1EE6300E26EED /* IOKit.framework */; };
 		939F4F2F1EE1EE7200E26EED /* CoreFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 939F4F2E1EE1EE7200E26EED /* CoreFoundation.framework */; };
+		93D40E6B2A6F36B400A6DE28 /* json.hpp in Headers */ = {isa = PBXBuildFile; fileRef = 93D40E6A2A6F36B400A6DE28 /* json.hpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +32,7 @@
 		9354853A23E7C50200711E27 /* x2powercontrol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = x2powercontrol.cpp; sourceTree = "<group>"; };
 		939F4F2C1EE1EE6300E26EED /* IOKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IOKit.framework; path = System/Library/Frameworks/IOKit.framework; sourceTree = SDKROOT; };
 		939F4F2E1EE1EE7200E26EED /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = System/Library/Frameworks/CoreFoundation.framework; sourceTree = SDKROOT; };
+		93D40E6A2A6F36B400A6DE28 /* json.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = json.hpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -67,6 +69,7 @@
 		933E14201EDCA6AC0044D947 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				93D40E6A2A6F36B400A6DE28 /* json.hpp */,
 				9354853A23E7C50200711E27 /* x2powercontrol.cpp */,
 				9354853923E7C50200711E27 /* x2powercontrol.h */,
 				933A04311EE0BD5D00D06551 /* StopWatch.h */,
@@ -98,6 +101,7 @@
 				933E14261EDCA6B90044D947 /* main.h in Headers */,
 				933A04321EE0BD5D00D06551 /* StopWatch.h in Headers */,
 				9354853B23E7C50200711E27 /* x2powercontrol.h in Headers */,
+				93D40E6B2A6F36B400A6DE28 /* json.hpp in Headers */,
 				9306A75D1EDE325800A1E90B /* PowerEagle.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -225,7 +229,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -280,7 +284,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
 			};
@@ -301,7 +305,7 @@
 					"\"$(SRCROOT)/\"",
 					"\"$(SRCROOT)/../..\"",
 				);
-				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -322,7 +326,7 @@
 					"\"$(SRCROOT)/\"",
 					"\"$(SRCROOT)/../..\"",
 				);
-				MACOSX_DEPLOYMENT_TARGET = "$(RECOMMENDED_MACOSX_DEPLOYMENT_TARGET)";
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

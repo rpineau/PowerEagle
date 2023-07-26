@@ -252,6 +252,7 @@ int CPowerEagle::getData()
                 jResp = json::parse(response_string);
                 if(jResp.at("result").get<std::string>() == "OK") {
                     m_sFirmware = jResp.at("firmwareversion").get<std::string>();
+                    m_sSerialNumber = jResp.at("firmwaserialnumberreversion").get<std::string>();
                 }
                 else {
 #if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
@@ -270,38 +271,9 @@ int CPowerEagle::getData()
         }
     }
 
-
-    // do http GET request to local server environmental data
-    nErr = doGET("/getecco", response_string);
-    if(nErr) {
-        return nErr;
-    }
-
-    // process response_string
-    try {
-        jResp = json::parse(response_string);
-        if(jResp.at("result").get<std::string>() == "OK") {
-        }
-        else {
 #if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
-            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getData] getecco error : " << jResp << std::endl;
-            m_sLogFile.flush();
-#endif
-            return ERR_CMDFAILED;
-        }
-    }
-    catch (json::exception& e) {
-#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
-        m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getData] json exception : " << e.what() << " - " << e.id << std::endl;
-        m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getData] json exception response : " << response_string << std::endl;
-        m_sLogFile.flush();
-#endif
-        return ERR_CMDFAILED;
-    }
-
-
-#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
-    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getData] m_sFirmware            : " << m_sFirmware << std::endl;
+    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getData] m_sFirmware        : " << m_sFirmware << std::endl;
+    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getData] m_sSerialNumber    : " << m_sSerialNumber << std::endl;
     m_sLogFile.flush();
 #endif
 
@@ -323,6 +295,30 @@ int CPowerEagle::getSupply(double &dSupplyVolts)
     m_sLogFile.flush();
 #endif
 
+    nErr = doGET("/getsupply", response_string);
+    if(!nErr) {
+        // process response_string
+        try {
+            jResp = json::parse(response_string);
+            if(jResp.at("result").get<std::string>() == "OK") {
+                dSupplyVolts = jResp.at("supply").get<std::double_t>();
+            }
+            else {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getSupply] getinfo error : " << jResp << std::endl;
+                m_sLogFile.flush();
+#endif
+            }
+        }
+        catch (json::exception& e) {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getSupply] json exception : " << e.what() << " - " << e.id << std::endl;
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getSupply] json exception response : " << response_string << std::endl;
+            m_sLogFile.flush();
+#endif
+        }
+    }
+
     return nErr;
 }
 
@@ -332,6 +328,7 @@ int CPowerEagle::getPwrOut(int nIndex, double &dVolts, double &dCurrent, double 
     json jResp;
     std::string response_string;
     std::string PowerEagleError;
+    std::stringstream ssTmp;
 
     if(!m_bIsConnected || !m_Curl)
         return ERR_COMMNOLINK;
@@ -340,7 +337,37 @@ int CPowerEagle::getPwrOut(int nIndex, double &dVolts, double &dCurrent, double 
     m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getPwrOut] Called." << std::endl;
     m_sLogFile.flush();
 #endif
-
+    // <portidx>=1,2,3,4
+    if(nIndex<1 || nIndex>4)
+        return ERR_INDEX_OUT_OF_RANGE;
+    
+    ssTmp << "/getpwrout?idx=" << nIndex;
+    nErr = doGET(ssTmp.str(), response_string);
+    if(!nErr) {
+        // process response_string
+        try {
+            jResp = json::parse(response_string);
+            if(jResp.at("result").get<std::string>() == "OK") {
+                dVolts = jResp.at("voltage").get<std::double_t>();
+                dCurrent = jResp.at("current").get<std::double_t>();
+                dPower = jResp.at("power").get<std::double_t>();
+                sLabel = jResp.at("label").get<std::string>();
+            }
+            else {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getPwrOut] getinfo error : " << jResp << std::endl;
+                m_sLogFile.flush();
+#endif
+            }
+        }
+        catch (json::exception& e) {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getPwrOut] json exception : " << e.what() << " - " << e.id << std::endl;
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getPwrOut] json exception response : " << response_string << std::endl;
+            m_sLogFile.flush();
+#endif
+        }
+    }
     return nErr;
 }
 
@@ -350,6 +377,7 @@ int CPowerEagle::setPwrOut(int nIndex, bool bOn)
     json jResp;
     std::string response_string;
     std::string PowerEagleError;
+    std::stringstream ssTmp;
 
     if(!m_bIsConnected || !m_Curl)
         return ERR_COMMNOLINK;
@@ -358,6 +386,34 @@ int CPowerEagle::setPwrOut(int nIndex, bool bOn)
     m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrOut] Called." << std::endl;
     m_sLogFile.flush();
 #endif
+    // <portidx>=1,2,3,4
+    if(nIndex<1 || nIndex>4)
+        return ERR_INDEX_OUT_OF_RANGE;
+
+    ssTmp << "/setpwrout?idx=" << nIndex << "&state=" << (bOn?1:0);
+    nErr = doGET(ssTmp.str(), response_string);
+    if(!nErr) {
+        // process response_string
+        try {
+            jResp = json::parse(response_string);
+            if(jResp.at("result").get<std::string>() != "OK") {
+                return ERR_CMDFAILED;
+            }
+            else {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrOut] getinfo error : " << jResp << std::endl;
+                m_sLogFile.flush();
+#endif
+            }
+        }
+        catch (json::exception& e) {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrOut] json exception : " << e.what() << " - " << e.id << std::endl;
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrOut] json exception response : " << response_string << std::endl;
+            m_sLogFile.flush();
+#endif
+        }
+    }
 
     return nErr;
 }
@@ -368,7 +424,8 @@ int CPowerEagle::setPwrOutLabel(int nIndex, std::string sLabel)
     json jResp;
     std::string response_string;
     std::string PowerEagleError;
-
+    std::stringstream ssTmp;
+    
     if(!m_bIsConnected || !m_Curl)
         return ERR_COMMNOLINK;
 
@@ -376,6 +433,35 @@ int CPowerEagle::setPwrOutLabel(int nIndex, std::string sLabel)
     m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrOutLabel] Called." << std::endl;
     m_sLogFile.flush();
 #endif
+    
+    // <portidx>=1,2,3,4
+    if(nIndex<1 || nIndex>4)
+        return ERR_INDEX_OUT_OF_RANGE;
+
+    ssTmp << "/setpwrout?idx=" << nIndex << "&label=" << sLabel;
+    nErr = doGET(ssTmp.str(), response_string);
+    if(!nErr) {
+        // process response_string
+        try {
+            jResp = json::parse(response_string);
+            if(jResp.at("result").get<std::string>() != "OK") {
+                return ERR_CMDFAILED;
+            }
+            else {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrOutLabel] getinfo error : " << jResp << std::endl;
+                m_sLogFile.flush();
+#endif
+            }
+        }
+        catch (json::exception& e) {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrOutLabel] json exception : " << e.what() << " - " << e.id << std::endl;
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrOutLabel] json exception response : " << response_string << std::endl;
+            m_sLogFile.flush();
+#endif
+        }
+    }
 
     return nErr;
 }
@@ -386,7 +472,8 @@ int CPowerEagle::getPwrHub(int nIndex, bool &bOn, std::string &sLabel)
     json jResp;
     std::string response_string;
     std::string PowerEagleError;
-
+    std::stringstream ssTmp;
+    
     if(!m_bIsConnected || !m_Curl)
         return ERR_COMMNOLINK;
 
@@ -394,7 +481,36 @@ int CPowerEagle::getPwrHub(int nIndex, bool &bOn, std::string &sLabel)
     m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getPwrHub] Called." << std::endl;
     m_sLogFile.flush();
 #endif
+    // <usb_portidx>=1,2,3,4
+    if(nIndex<1 || nIndex>4)
+        return ERR_INDEX_OUT_OF_RANGE;
 
+    ssTmp << "/getpwrhub?idx=" << nIndex;
+    nErr = doGET(ssTmp.str(), response_string);
+    if(!nErr) {
+        // process response_string
+        try {
+            jResp = json::parse(response_string);
+            if(jResp.at("result").get<std::string>() == "OK") {
+                bOn = (jResp.at("power").get<int>()==1);
+                sLabel = jResp.at("label").get<std::string>();
+            }
+            else {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getPwrHub] getinfo error : " << jResp << std::endl;
+                m_sLogFile.flush();
+#endif
+            }
+        }
+        catch (json::exception& e) {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getPwrHub] json exception : " << e.what() << " - " << e.id << std::endl;
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getPwrHub] json exception response : " << response_string << std::endl;
+            m_sLogFile.flush();
+#endif
+        }
+    }
+    
     return nErr;
 }
 
@@ -404,7 +520,8 @@ int CPowerEagle::setPwrHub(int nIndex, bool bOn)
     json jResp;
     std::string response_string;
     std::string PowerEagleError;
-
+    std::stringstream ssTmp;
+    
     if(!m_bIsConnected || !m_Curl)
         return ERR_COMMNOLINK;
 
@@ -412,6 +529,35 @@ int CPowerEagle::setPwrHub(int nIndex, bool bOn)
     m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrHub] Called." << std::endl;
     m_sLogFile.flush();
 #endif
+
+    // <usb_portidx>=1,2,3,4
+    if(nIndex<1 || nIndex>4)
+        return ERR_INDEX_OUT_OF_RANGE;
+
+    ssTmp << "/setpwrhub?idx=" << nIndex << "&state=" << (bOn?1:0);
+    nErr = doGET(ssTmp.str(), response_string);
+    if(!nErr) {
+        // process response_string
+        try {
+            jResp = json::parse(response_string);
+            if(jResp.at("result").get<std::string>() != "OK") {
+                return ERR_CMDFAILED;
+            }
+            else {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrHub] getinfo error : " << jResp << std::endl;
+                m_sLogFile.flush();
+#endif
+            }
+        }
+        catch (json::exception& e) {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrHub] json exception : " << e.what() << " - " << e.id << std::endl;
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrHub] json exception response : " << response_string << std::endl;
+            m_sLogFile.flush();
+#endif
+        }
+    }
 
     return nErr;
 }
@@ -422,7 +568,8 @@ int CPowerEagle::setPwrHubLabel(int nIndex, std::string sLabel)
     json jResp;
     std::string response_string;
     std::string PowerEagleError;
-
+    std::stringstream ssTmp;
+    
     if(!m_bIsConnected || !m_Curl)
         return ERR_COMMNOLINK;
 
@@ -430,6 +577,35 @@ int CPowerEagle::setPwrHubLabel(int nIndex, std::string sLabel)
     m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrHubLabel] Called." << std::endl;
     m_sLogFile.flush();
 #endif
+
+    // <usb_portidx>=1,2,3,4
+    if(nIndex<1 || nIndex>4)
+        return ERR_INDEX_OUT_OF_RANGE;
+
+    ssTmp << "/setpwrhub?idx=" << nIndex << "&label=" << sLabel;
+    nErr = doGET(ssTmp.str(), response_string);
+    if(!nErr) {
+        // process response_string
+        try {
+            jResp = json::parse(response_string);
+            if(jResp.at("result").get<std::string>() != "OK") {
+                return ERR_CMDFAILED;
+            }
+            else {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrHubLabel] getinfo error : " << jResp << std::endl;
+                m_sLogFile.flush();
+#endif
+            }
+        }
+        catch (json::exception& e) {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrHubLabel] json exception : " << e.what() << " - " << e.id << std::endl;
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setPwrHubLabel] json exception response : " << response_string << std::endl;
+            m_sLogFile.flush();
+#endif
+        }
+    }
 
     return nErr;
 }
@@ -440,7 +616,8 @@ int CPowerEagle::getRegOut(int nIndex, double &dVolts, double &dCurrent, double 
     json jResp;
     std::string response_string;
     std::string PowerEagleError;
-
+    std::stringstream ssTmp;
+    
     if(!m_bIsConnected || !m_Curl)
         return ERR_COMMNOLINK;
 
@@ -448,6 +625,37 @@ int CPowerEagle::getRegOut(int nIndex, double &dVolts, double &dCurrent, double 
     m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getRegOut] Called." << std::endl;
     m_sLogFile.flush();
 #endif
+    // <rca_portidx>=5,6,7;
+    if(nIndex<5 || nIndex>7)
+        return ERR_INDEX_OUT_OF_RANGE;
+
+    ssTmp << "/getregout?idx=" << nIndex;
+    nErr = doGET(ssTmp.str(), response_string);
+    if(!nErr) {
+        // process response_string
+        try {
+            jResp = json::parse(response_string);
+            if(jResp.at("result").get<std::string>() == "OK") {
+                dVolts = jResp.at("voltage").get<std::double_t>();
+                dCurrent = jResp.at("current").get<std::double_t>();
+                dPower = jResp.at("power").get<std::double_t>();
+                sLabel = jResp.at("label").get<std::string>();
+            }
+            else {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getRegOut] getinfo error : " << jResp << std::endl;
+                m_sLogFile.flush();
+#endif
+            }
+        }
+        catch (json::exception& e) {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getRegOut] json exception : " << e.what() << " - " << e.id << std::endl;
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getRegOut] json exception response : " << response_string << std::endl;
+            m_sLogFile.flush();
+#endif
+        }
+    }
 
     return nErr;
 }
@@ -458,7 +666,8 @@ int CPowerEagle::setRegOut(int nIndex, double dVolts)
     json jResp;
     std::string response_string;
     std::string PowerEagleError;
-
+    std::stringstream ssTmp;
+    
     if(!m_bIsConnected || !m_Curl)
         return ERR_COMMNOLINK;
 
@@ -466,6 +675,34 @@ int CPowerEagle::setRegOut(int nIndex, double dVolts)
     m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setRegOut] Called." << std::endl;
     m_sLogFile.flush();
 #endif
+    // <rca_portidx>=5,6,7;
+    if(nIndex<5 || nIndex>7)
+        return ERR_INDEX_OUT_OF_RANGE;
+
+    ssTmp << "/setregout?idx=" << nIndex << "&volt=" << std::fixed << std::setprecision(1) << dVolts;
+    nErr = doGET(ssTmp.str(), response_string);
+    if(!nErr) {
+        // process response_string
+        try {
+            jResp = json::parse(response_string);
+            if(jResp.at("result").get<std::string>() != "OK") {
+                return ERR_CMDFAILED;
+            }
+            else {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setRegOut] getinfo error : " << jResp << std::endl;
+                m_sLogFile.flush();
+#endif
+            }
+        }
+        catch (json::exception& e) {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setRegOut] json exception : " << e.what() << " - " << e.id << std::endl;
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setRegOut] json exception response : " << response_string << std::endl;
+            m_sLogFile.flush();
+#endif
+        }
+    }
 
     return nErr;
 }
@@ -476,6 +713,7 @@ int CPowerEagle::setRegOutLabel(int nIndex, std::string sLabel)
     json jResp;
     std::string response_string;
     std::string PowerEagleError;
+    std::stringstream ssTmp;
 
     if(!m_bIsConnected || !m_Curl)
         return ERR_COMMNOLINK;
@@ -484,6 +722,35 @@ int CPowerEagle::setRegOutLabel(int nIndex, std::string sLabel)
     m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setRegOutLabel] Called." << std::endl;
     m_sLogFile.flush();
 #endif
+
+    // <rca_portidx>=5,6,7;
+    if(nIndex<5 || nIndex>7)
+        return ERR_INDEX_OUT_OF_RANGE;
+
+    ssTmp << "/setregout?idx=" << nIndex << "&label=" << sLabel;
+    nErr = doGET(ssTmp.str(), response_string);
+    if(!nErr) {
+        // process response_string
+        try {
+            jResp = json::parse(response_string);
+            if(jResp.at("result").get<std::string>() != "OK") {
+                return ERR_CMDFAILED;
+            }
+            else {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setRegOutLabel] getinfo error : " << jResp << std::endl;
+                m_sLogFile.flush();
+#endif
+            }
+        }
+        catch (json::exception& e) {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setRegOutLabel] json exception : " << e.what() << " - " << e.id << std::endl;
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setRegOutLabel] json exception response : " << response_string << std::endl;
+            m_sLogFile.flush();
+#endif
+        }
+    }
 
     return nErr;
 }

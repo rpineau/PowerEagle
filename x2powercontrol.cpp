@@ -196,102 +196,172 @@ int X2PowerControl::numberOfCircuits(int& nNumber)
 int X2PowerControl::circuitState(const int& nIndex, bool& bZeroForOffOneForOn)
 {
 	int nErr = SB_OK;
+    int nNewIndex;
+    double dVolts;
+    double dCurrent;
+    double dPower;
+    bool bOn;
+    std::string sLabel;
 
-	if(!m_bLinked)
+    if(!m_bLinked)
         return ERR_NOLINK;
     switch(nIndex) {
-            // power port
+            // power port <portidx>=1,2,3,4
         case 0:
+            nNewIndex = 1;
+            nErr = m_PowerPorts.getPwrOut(nNewIndex, dVolts, dCurrent, dPower, sLabel);
+            bZeroForOffOneForOn = (dVolts>0.0);
+            break;
         case 1:
+            nNewIndex = 2;
+            nErr = m_PowerPorts.getPwrOut(nNewIndex, dVolts, dCurrent, dPower, sLabel);
+            bZeroForOffOneForOn = (dVolts>0.0);
+            break;
         case 2:
+            nNewIndex = 3;
+            nErr = m_PowerPorts.getPwrOut(nNewIndex, dVolts, dCurrent, dPower, sLabel);
+            bZeroForOffOneForOn = (dVolts>0.0);
+            break;
         case 3:
+            nNewIndex = 4;
+            nErr = m_PowerPorts.getPwrOut(nNewIndex, dVolts, dCurrent, dPower, sLabel);
+            bZeroForOffOneForOn = (dVolts>0.0);
             break;
-            // regulated port
+            /// usb port  <usb_portidx>=1,2,3,4
         case 4:
-        case 5:
-        case 6:
-        case 7:
+            nNewIndex = 1;
+            nErr = m_PowerPorts.getPwrHub(nNewIndex, bOn, sLabel);
+            bZeroForOffOneForOn = bOn;
             break;
-            /// usb port
-        case 8:
-        case 9:
-        case 10:
+        case 5:
+            nNewIndex = 2;
+            nErr = m_PowerPorts.getPwrHub(nNewIndex, bOn, sLabel);
+            bZeroForOffOneForOn = bOn;
+            break;
+        case 6:
+            nNewIndex = 3;
+            nErr =  m_PowerPorts.getPwrHub(nNewIndex, bOn, sLabel);
+            bZeroForOffOneForOn = bOn;
+            break;
+        case 7:
+            nNewIndex = 4;
+            nErr = m_PowerPorts.getPwrHub(nNewIndex, bOn, sLabel);
+            bZeroForOffOneForOn = bOn;
             break;
         default :
             nErr = ERR_CMDFAILED;
     }
-/*
-	if (nIndex >= 0 && nIndex<m_PowerPorts.getPortCount())
-        bZeroForOffOneForOn = m_PowerPorts.getPortStatus(nIndex+1, bZeroForOffOneForOn);
-	else
-		nErr = ERR_INDEX_OUT_OF_RANGE;
-*/
+    
 	return nErr;
 }
 
 int X2PowerControl::setCircuitState(const int& nIndex, const bool& bZeroForOffOneForOn)
 {
 	int nErr = SB_OK;
+    int nNewIndex;
 
 	if(!m_bLinked)
         return ERR_NOLINK;
 
     switch(nIndex) {
-            // power port
+            // power port <portidx>=1,2,3,4
         case 0:
+            nNewIndex = 1;
+            nErr =  m_PowerPorts.setPwrOut(nNewIndex, bZeroForOffOneForOn);
+            break;
         case 1:
+            nNewIndex = 2;
+            nErr =  m_PowerPorts.setPwrOut(nNewIndex, bZeroForOffOneForOn);
+            break;
         case 2:
+            nNewIndex = 3;
+            nErr =  m_PowerPorts.setPwrOut(nNewIndex, bZeroForOffOneForOn);
+            break;
         case 3:
+            nNewIndex = 4;
+            nErr =  m_PowerPorts.setPwrOut(nNewIndex, bZeroForOffOneForOn);
             break;
-            // regulated port
+            /// usb port  <usb_portidx>=1,2,3,4
         case 4:
-        case 5:
-        case 6:
-        case 7:
+            nNewIndex = 1;
+            nErr =  m_PowerPorts.setPwrHub(nNewIndex, bZeroForOffOneForOn);
             break;
-            /// usb port
-        case 8:
-        case 9:
-        case 10:
+        case 5:
+            nNewIndex = 2;
+            nErr =  m_PowerPorts.setPwrHub(nNewIndex, bZeroForOffOneForOn);
+            break;
+        case 6:
+            nNewIndex = 3;
+            nErr =  m_PowerPorts.setPwrHub(nNewIndex, bZeroForOffOneForOn);
+            break;
+        case 7:
+            nNewIndex = 4;
+            nErr =  m_PowerPorts.setPwrHub(nNewIndex, bZeroForOffOneForOn);
             break;
         default :
             nErr = ERR_CMDFAILED;
-    }
+}
 
-/*
-	if (nIndex >= 0 && nIndex < m_PowerPorts.getPortCount())
-        nErr = m_PowerPorts.setPort(nIndex+1, bZeroForOffOneForOn);
-	else
-		nErr = ERR_INDEX_OUT_OF_RANGE;
-*/
 	return nErr;
 }
 
 int X2PowerControl::circuitLabel(const int &nZeroBasedIndex, BasicStringInterface &str)
 {
     int nErr = SB_OK;
+    int nNewIndex;
+    double dVolts;
+    double dCurrent;
+    double dPower;
+    bool bOn;
+    std::string sLabel;
+
     if(m_bLinked) {
         switch(nZeroBasedIndex) {
-                // power port
+                // power port <portidx>=1,2,3,4
             case 0:
+                nNewIndex = 1;
+                nErr = m_PowerPorts.getPwrOut(nNewIndex, dVolts, dCurrent, dPower, sLabel);
+                str = sLabel.c_str();
+                break;
             case 1:
+                nNewIndex = 2;
+                nErr = m_PowerPorts.getPwrOut(nNewIndex, dVolts, dCurrent, dPower, sLabel);
+                str = sLabel.c_str();
+                break;
             case 2:
+                nNewIndex = 3;
+                nErr = m_PowerPorts.getPwrOut(nNewIndex, dVolts, dCurrent, dPower, sLabel);
+                str = sLabel.c_str();
+                break;
             case 3:
+                nNewIndex = 4;
+                nErr = m_PowerPorts.getPwrOut(nNewIndex, dVolts, dCurrent, dPower, sLabel);
+                str = sLabel.c_str();
                 break;
-                // regulated port
+                /// usb port  <usb_portidx>=1,2,3,4
             case 4:
-            case 5:
-            case 6:
-            case 7:
+                nNewIndex = 1;
+                nErr = m_PowerPorts.getPwrHub(nNewIndex, bOn, sLabel);
+                str = sLabel.c_str();
                 break;
-                /// usb port
-            case 8:
-            case 9:
-            case 10:
+            case 5:
+                nNewIndex = 2;
+                nErr = m_PowerPorts.getPwrHub(nNewIndex, bOn, sLabel);
+                str = sLabel.c_str();
+                break;
+            case 6:
+                nNewIndex = 3;
+                nErr = m_PowerPorts.getPwrHub(nNewIndex, bOn, sLabel);
+                str = sLabel.c_str();
+                break;
+            case 7:
+                nNewIndex = 4;
+                nErr = m_PowerPorts.getPwrHub(nNewIndex, bOn, sLabel);
+                str = sLabel.c_str();
                 break;
             default :
                 nErr = ERR_CMDFAILED;
-        }
+           }
     }
     else {
         std::string sLabel = "Eagle port " + std::to_string(nZeroBasedIndex+1);
@@ -304,32 +374,52 @@ int X2PowerControl::circuitLabel(const int &nZeroBasedIndex, BasicStringInterfac
 int X2PowerControl::setCircuitLabel(const int &nZeroBasedIndex, const char *str)
 {
     int nErr = SB_OK;
+    int nNewIndex;
 
     if(m_bLinked) {
         switch(nZeroBasedIndex) {
-                // power port
+                // power port <portidx>=1,2,3,4
             case 0:
+                nNewIndex = 1;
+                nErr = m_PowerPorts.setPwrOutLabel(nNewIndex, std::string(str));
+                break;
             case 1:
+                nNewIndex = 2;
+                nErr = m_PowerPorts.setPwrOutLabel(nNewIndex, std::string(str));
+                break;
             case 2:
+                nNewIndex = 3;
+                nErr = m_PowerPorts.setPwrOutLabel(nNewIndex, std::string(str));
+                break;
             case 3:
+                nNewIndex = 4;
+                nErr = m_PowerPorts.setPwrOutLabel(nNewIndex, std::string(str));
                 break;
-                // regulated port
+                /// usb port  <usb_portidx>=1,2,3,4
             case 4:
-            case 5:
-            case 6:
-            case 7:
+                nNewIndex = 1;
+                nErr = m_PowerPorts.setPwrHubLabel(nNewIndex, std::string(str));
                 break;
-                /// usb port
-            case 8:
-            case 9:
-            case 10:
+            case 5:
+                nNewIndex = 2;
+                nErr = m_PowerPorts.setPwrHubLabel(nNewIndex, std::string(str));
+                break;
+            case 6:
+                nNewIndex = 3;
+                nErr = m_PowerPorts.setPwrHubLabel(nNewIndex, std::string(str));
+                break;
+            case 7:
+                nNewIndex = 4;
+                nErr = m_PowerPorts.setPwrHubLabel(nNewIndex, std::string(str));
                 break;
             default :
                 nErr = ERR_CMDFAILED;
         }
     }
     else {
-        nErr = ERR_CMDFAILED;
+        std::string sLabel = "Eagle port " + std::to_string(nZeroBasedIndex+1);
+        str = sLabel.c_str();
     }
+
     return nErr;
 }

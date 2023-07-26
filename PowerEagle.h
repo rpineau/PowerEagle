@@ -51,7 +51,7 @@ using json = nlohmann::json;
 
 #define PLUGIN_DEBUG 3
 
-#define NB_PORTS 11 // 4 pwr, 4 usb, 3 regulated
+#define NB_PORTS 8 // 4 pwr, 4 usb, the 3 regulated can't be turned off
 
 // error codes
 enum WeatherEagleErrors {PLUGIN_OK=0, NOT_CONNECTED, CANT_CONNECT, BAD_CMD_RESPONSE, COMMAND_FAILED, COMMAND_TIMEOUT, PARSE_FAILED};
@@ -102,6 +102,7 @@ protected:
     std::string     m_sModel;
     double          m_dFirmwareVersion;
 
+    std::string     m_sSerialNumber;
     CURL            *m_Curl;
     std::string     m_sBaseUrl;
 
