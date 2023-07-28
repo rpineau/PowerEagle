@@ -755,6 +755,97 @@ int CPowerEagle::setRegOutLabel(int nIndex, std::string sLabel)
     return nErr;
 }
 
+
+int CPowerEagle::getDarMode(bool &bOn)
+{    int nErr = PLUGIN_OK;
+    json jResp;
+    std::string response_string;
+    std::string PowerEagleError;
+    bool bDarkModeState;
+    
+    if(!m_bIsConnected || !m_Curl)
+        return ERR_COMMNOLINK;
+
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [isDarModeOn] Called." << std::endl;
+    m_sLogFile.flush();
+#endif
+
+
+    nErr = doGET("/getdarkmode", response_string);
+    if(!nErr) {
+        // process response_string
+        try {
+            jResp = json::parse(response_string);
+            if(jResp.at("result").get<std::string>() != "OK") {
+                bDarkModeState = jResp.at("darkModeActive").get<int>()==1?true:false;
+            }
+            else {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [isDarModeOn] getinfo error : " << jResp << std::endl;
+                m_sLogFile.flush();
+#endif
+            }
+        }
+        catch (json::exception& e) {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [isDarModeOn] json exception : " << e.what() << " - " << e.id << std::endl;
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [isDarModeOn] json exception response : " << response_string << std::endl;
+            m_sLogFile.flush();
+#endif
+        }
+    }
+
+    return nErr;
+
+}
+
+int CPowerEagle::setDarkModeOn(bool bOn)
+{
+    int nErr = PLUGIN_OK;
+    json jResp;
+    std::string response_string;
+    std::string PowerEagleError;
+    std::stringstream ssTmp;
+
+    if(!m_bIsConnected || !m_Curl)
+        return ERR_COMMNOLINK;
+
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setDarkModeOn] Called." << std::endl;
+    m_sLogFile.flush();
+#endif
+
+
+    ssTmp << "/setdarkmode?active=" << (bOn?1:0);
+    nErr = doGET(ssTmp.str(), response_string);
+    if(!nErr) {
+        // process response_string
+        try {
+            jResp = json::parse(response_string);
+            if(jResp.at("result").get<std::string>() != "OK") {
+                return ERR_CMDFAILED;
+            }
+            else {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setDarkModeOn] getinfo error : " << jResp << std::endl;
+                m_sLogFile.flush();
+#endif
+            }
+        }
+        catch (json::exception& e) {
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setDarkModeOn] json exception : " << e.what() << " - " << e.id << std::endl;
+            m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setDarkModeOn] json exception response : " << response_string << std::endl;
+            m_sLogFile.flush();
+#endif
+        }
+    }
+
+    return nErr;
+}
+
+
 void CPowerEagle::getIpAddress(std::string &IpAddress)
 {
     IpAddress = m_sIpAddress;

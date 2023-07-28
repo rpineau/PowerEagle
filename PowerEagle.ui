@@ -127,7 +127,7 @@
         <x>20</x>
         <y>270</y>
         <width>430</width>
-        <height>210</height>
+        <height>230</height>
        </rect>
       </property>
       <property name="title">
@@ -149,7 +149,7 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="voltage">
+      <widget class="QLabel" name="mainVoltage">
        <property name="geometry">
         <rect>
          <x>200</x>
@@ -169,7 +169,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>130</y>
+         <y>160</y>
          <width>130</width>
          <height>24</height>
         </rect>
@@ -185,7 +185,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>150</y>
+         <y>180</y>
          <width>130</width>
          <height>24</height>
         </rect>
@@ -201,7 +201,7 @@
        <property name="geometry">
         <rect>
          <x>70</x>
-         <y>170</y>
+         <y>200</y>
          <width>130</width>
          <height>24</height>
         </rect>
@@ -261,7 +261,7 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="currentDraw_6">
+      <widget class="QLabel" name="powerPort1">
        <property name="geometry">
         <rect>
          <x>210</x>
@@ -277,7 +277,7 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="currentDraw_7">
+      <widget class="QLabel" name="powerPort2">
        <property name="geometry">
         <rect>
          <x>210</x>
@@ -293,7 +293,7 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="currentDraw_8">
+      <widget class="QLabel" name="powerPort3">
        <property name="geometry">
         <rect>
          <x>210</x>
@@ -309,11 +309,11 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="currentDraw_9">
+      <widget class="QLabel" name="regPort1">
        <property name="geometry">
         <rect>
          <x>210</x>
-         <y>130</y>
+         <y>160</y>
          <width>150</width>
          <height>24</height>
         </rect>
@@ -325,11 +325,11 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="currentDraw_10">
+      <widget class="QLabel" name="regPort2">
        <property name="geometry">
         <rect>
          <x>210</x>
-         <y>150</y>
+         <y>180</y>
          <width>150</width>
          <height>24</height>
         </rect>
@@ -341,17 +341,49 @@
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
        </property>
       </widget>
-      <widget class="QLabel" name="currentDraw_11">
+      <widget class="QLabel" name="regPort3">
        <property name="geometry">
         <rect>
          <x>210</x>
-         <y>170</y>
+         <y>200</y>
          <width>150</width>
          <height>24</height>
         </rect>
        </property>
        <property name="text">
         <string>--.- V  /  --.- A  / --.- W</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="powerPort4">
+       <property name="geometry">
+        <rect>
+         <x>210</x>
+         <y>120</y>
+         <width>150</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>--.- V  /  --.- A  / --.- W</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+      <widget class="QLabel" name="label_29">
+       <property name="geometry">
+        <rect>
+         <x>110</x>
+         <y>120</y>
+         <width>90</width>
+         <height>24</height>
+        </rect>
+       </property>
+       <property name="text">
+        <string>12V Port 4 :</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -368,7 +400,7 @@
        </rect>
       </property>
       <property name="title">
-       <string>Regulated port</string>
+       <string>Regulated ports voltage</string>
       </property>
       <widget class="QLabel" name="label_8">
        <property name="geometry">
@@ -396,7 +428,7 @@
         <string>Set</string>
        </property>
       </widget>
-      <widget class="QDoubleSpinBox" name="doubleSpinBox">
+      <widget class="QDoubleSpinBox" name="regPort1Volts">
        <property name="geometry">
         <rect>
          <x>80</x>
@@ -444,7 +476,7 @@
         <string>Port 2 :</string>
        </property>
       </widget>
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_2">
+      <widget class="QDoubleSpinBox" name="regPort2Volts">
        <property name="geometry">
         <rect>
          <x>80</x>
@@ -492,7 +524,7 @@
         <string>Port 3 :</string>
        </property>
       </widget>
-      <widget class="QDoubleSpinBox" name="doubleSpinBox_3">
+      <widget class="QDoubleSpinBox" name="regPort3Volts">
        <property name="geometry">
         <rect>
          <x>80</x>

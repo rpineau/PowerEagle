@@ -133,8 +133,13 @@ int X2PowerControl::execModalSettingsDialog()
     X2GUIInterface*                    ui = uiutil.X2UI();
     X2GUIExchangeInterface*            dx = NULL;//Comes after ui is loaded
     bool bPressedOK = false;
-    bool bOn = false;
-
+    double dPortVolts;
+    double dPortAmps;
+    double dPortPower;
+    std::string sTmp;
+    bool bDarkMode;
+    std::stringstream ssTmp;
+    
     if (NULL == ui)
         return ERR_POINTER;
 
@@ -148,6 +153,55 @@ int X2PowerControl::execModalSettingsDialog()
     if(m_bLinked) {
         dx->setEnabled("pushButton",true);
         dx->setEnabled("pushButton_2",true);
+
+        nErr = m_PowerPorts.getDarMode(bDarkMode);
+        if(bDarkMode)
+            dx->setChecked("radioButton_3", 1);
+        else
+            dx->setChecked("radioButton_4", 1);
+
+
+        nErr =  m_PowerPorts.getSupply(dPortVolts);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << "V";
+        dx->setText("mainVoltage", ssTmp.str().c_str());
+
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getPwrOut(1, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        dx->setText("powerPort1", ssTmp.str().c_str());
+
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getPwrOut(2, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        dx->setText("powerPort2", ssTmp.str().c_str());
+
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getPwrOut(3, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        dx->setText("powerPort3", ssTmp.str().c_str());
+
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getPwrOut(4, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        dx->setText("powerPort4", ssTmp.str().c_str());
+
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getRegOut(5, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        dx->setText("regPort1", ssTmp.str().c_str());
+        dx->setPropertyDouble("regPort1Volts", "value", dPortVolts);
+        
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getRegOut(6, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        dx->setText("regPort2", ssTmp.str().c_str());
+        dx->setPropertyDouble("regPort2Volts", "value", dPortVolts);
+
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getRegOut(7, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        dx->setText("regPort3", ssTmp.str().c_str());
+        dx->setPropertyDouble("regPort3Volts", "value", dPortVolts);
 
     }
     else {
@@ -168,24 +222,76 @@ int X2PowerControl::execModalSettingsDialog()
 
 void X2PowerControl::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 {
-    double m_dPwmPort;
+    int nErr;
+    double dPortVolts;
+    double dPortAmps;
+    double dPortPower;
+    std::string sTmp;
+    std::stringstream ssTmp;
 
     if (!strcmp(pszEvent, "on_timer")) {
+        nErr =  m_PowerPorts.getSupply(dPortVolts);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << "V";
+        uiex->setText("mainVoltage", ssTmp.str().c_str());
+
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getPwrOut(1, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        uiex->setText("powerPort1", ssTmp.str().c_str());
+
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getPwrOut(2, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        uiex->setText("powerPort2", ssTmp.str().c_str());
+
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getPwrOut(3, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        uiex->setText("powerPort3", ssTmp.str().c_str());
+
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getPwrOut(4, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        uiex->setText("powerPort4", ssTmp.str().c_str());
+
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getRegOut(5, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        uiex->setText("regPort1", ssTmp.str().c_str());
+        
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getRegOut(6, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        uiex->setText("regPort2", ssTmp.str().c_str());
+
+        std::stringstream().swap(ssTmp);
+        nErr = m_PowerPorts.getRegOut(7, dPortVolts, dPortAmps, dPortPower, sTmp);
+        ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
+        uiex->setText("regPort3", ssTmp.str().c_str());
     }
 
-    else if (!strcmp(pszEvent, "on_checkBox_10_stateChanged")) {
-    //    nErr = m_PowerPorts.setLedEnable(uiex->isChecked("checkBox_10")?true:false);
+
+    else if (!strcmp(pszEvent, "on_pushButton_3_clicked")) {
+        uiex->propertyDouble("regPort1Volts", "value", dPortVolts);
+        nErr = m_PowerPorts.setRegOut(5, dPortVolts);
     }
 
-    else if (!strcmp(pszEvent, "on_pushButton_clicked")) {
-        uiex->propertyDouble("pwm6", "value", m_dPwmPort);
-    //    nErr = m_PowerPorts.setPortPWMDutyCyclePercent(6, m_dPwmPort);
+    else if (!strcmp(pszEvent, "on_pushButton_4_clicked")) {
+        uiex->propertyDouble("regPort2Volts", "value", dPortVolts);
+        nErr = m_PowerPorts.setRegOut(6, dPortVolts);
     }
-
-    else if (!strcmp(pszEvent, "on_pushButton_2_clicked")) {
-        uiex->propertyDouble("pwm7", "value", m_dPwmPort);
-    //    nErr = m_PowerPorts.setPortPWMDutyCyclePercent(7, m_dPwmPort);
+    else if (!strcmp(pszEvent, "on_pushButton_5_clicked")) {
+        uiex->propertyDouble("regPort3Volts", "value", dPortVolts);
+        nErr = m_PowerPorts.setRegOut(7, dPortVolts);
     }
+    
+    else if (!strcmp(pszEvent, "on_radioButton_3_clicked")) {
+        nErr = m_PowerPorts.setDarkModeOn(true);
+    }
+    else if (!strcmp(pszEvent, "on_radioButton_4_clicked")) {
+        nErr = m_PowerPorts.setDarkModeOn(false);
+    }
+    
 }
 
 int X2PowerControl::numberOfCircuits(int& nNumber)

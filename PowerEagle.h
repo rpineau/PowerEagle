@@ -84,6 +84,9 @@ public:
     int     setRegOut(int nIndex, double dVolts);
     int     setRegOutLabel(int nIndex, std::string sLabel);
 
+    int     getDarMode(bool &bOn);
+    int     setDarkModeOn(bool bOn);
+    
     static size_t writeFunction(void* ptr, size_t size, size_t nmemb, void* data);
 
     void getIpAddress(std::string &IpAddress);
