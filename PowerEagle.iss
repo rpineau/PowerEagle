@@ -50,9 +50,11 @@ Source: "powercontrollist PowerEagle.txt";                  DestDir: "{app}\Misc
 ; 32 bit
 Source: "libPowerEagle\Win32\Release\libPowerEagle.dll";    DestDir: "{app}\Plugins\PowerControlPlugIns"; Flags: ignoreversion
 Source: "PowerEagle.ui";                                    DestDir: "{app}\Plugins\PowerControlPlugIns"; Flags: ignoreversion
+Source: "PrimaLuceLab_2.png";                               DestDir: "{app}\Plugins\PowerControlPlugIns"; Flags: ignoreversion
 ; 64 bit
 Source: "libPowerEagle\x64\Release\libPowerEagle.dll";      DestDir: "{app}\Plugins64\PowerControlPlugIns"; Flags: ignoreversion; Check: DirExists(ExpandConstant('{app}\Plugins64\PowerControlPlugIns'))
 Source: "PowerEagle.ui";                                    DestDir: "{app}\Plugins64\PowerControlPlugIns"; Flags: ignoreversion; Check: DirExists(ExpandConstant('{app}\Plugins64\PowerControlPlugIns'))
+Source: "PrimaLuceLab_2.png";                               DestDir: "{app}\Plugins64\PowerControlPlugIns"; Flags: ignoreversion; Check: DirExists(ExpandConstant('{app}\Plugins64\PowerControlPlugIns'))
 
 [Code]
 {* Below is a function to read TheSkyXInstallPath.txt and confirm that the directory does exist
