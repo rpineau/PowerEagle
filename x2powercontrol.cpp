@@ -45,6 +45,11 @@ int X2PowerControl::establishLink(void)
 {
 	int nErr = SB_OK;
 
+    nErr = m_PowerPorts.Connect();
+    if(nErr) {
+        m_bLinked = false;
+        return nErr;
+    }
 
     m_bLinked = true;
 
@@ -54,7 +59,7 @@ int X2PowerControl::establishLink(void)
 int X2PowerControl::terminateLink(void)
 {
 	m_bLinked = false;
-
+    m_PowerPorts.Disconnect();
     return SB_OK;
 }
 
@@ -205,8 +210,30 @@ int X2PowerControl::execModalSettingsDialog()
 
     }
     else {
-        dx->setEnabled("pushButton",false);
-        dx->setEnabled("pushButton_2",false);
+        dx->setEnabled("radioButton_3",false);
+        dx->setEnabled("radioButton_4",false);
+
+        dx->setEnabled("regPort1Volts",false);
+        dx->setEnabled("regPort2Volts",false);
+        dx->setEnabled("regPort3Volts",false);
+        dx->setPropertyDouble("regPort1Volts", "value", 3.0);
+        dx->setPropertyDouble("regPort2Volts", "value", 3.0);
+        dx->setPropertyDouble("regPort3Volts", "value", 3.0);
+
+        dx->setEnabled("pushButton_3",false);
+        dx->setEnabled("pushButton_4",false);
+        dx->setEnabled("pushButton_5",false);
+
+        dx->setText("mainVoltage","--.- V");
+        dx->setText("powerPort1","--.- V  /  --.- A  / --.- W");
+        dx->setText("powerPort2","--.- V  /  --.- A  / --.- W");
+        dx->setText("powerPort3","--.- V  /  --.- A  / --.- W");
+        dx->setText("powerPort4","--.- V  /  --.- A  / --.- W");
+
+        dx->setText("regPort1","--.- V  /  --.- A  / --.- W");
+        dx->setText("regPort2","--.- V  /  --.- A  / --.- W");
+        dx->setText("regPort3","--.- V  /  --.- A  / --.- W");
+
     }
 
     //Display the user interface
@@ -228,6 +255,9 @@ void X2PowerControl::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
     double dPortPower;
     std::string sTmp;
     std::stringstream ssTmp;
+
+    if(!m_bLinked)
+        return;
 
     if (!strcmp(pszEvent, "on_timer")) {
         nErr =  m_PowerPorts.getSupply(dPortVolts);
