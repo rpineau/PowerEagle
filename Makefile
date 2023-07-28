@@ -2,8 +2,8 @@
 
 CC = gcc
 CFLAGS = -fPIC -Wall -Wextra -O2 -g -DSB_LINUX_BUILD -I. -I./../../
-CPPFLAGS = -fPIC -Wall -Wextra -O2 -g -DSB_LINUX_BUILD -I. -I./../../
-LDFLAGS = -shared -lstdc++
+CPPFLAGS = -fPIC -Wall -Wextra -O2 -g -DSB_LINUX_BUILD -std=c++17 -I. -I./../../
+LDFLAGS = -shared -lstdc++ -lcurl
 RM = rm -f
 STRIP = strip
 TARGET_LIB = libPowerEagle.so
@@ -16,6 +16,7 @@ all: ${TARGET_LIB}
 
 $(TARGET_LIB): $(OBJS)
 	$(CC) ${LDFLAGS} -o $@ $^
+	patchelf --add-needed libcurl.so.1 libPowerEagle.so
 	$(STRIP) $@ >/dev/null 2>&1  || true
 
 $(SRCS:.cpp=.d):%.d:%.cpp
