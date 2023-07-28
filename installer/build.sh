@@ -13,7 +13,7 @@ cp "../PrimaLuceLab_2.png" ROOT/tmp/PowerEagle_X2/
 cp "../powercontrollist PowerEagle.txt" ROOT/tmp/PowerEagle_X2/
 cp "../build/Release/libPowerEagle.dylib" ROOT/tmp/PowerEagle_X2/
 
-f [ ! -z "$installer_signature" ]; then
+if [ ! -z "$installer_signature" ]; then
 	# signed package using env variable installer_signature
 	pkgbuild --root ROOT --identifier $BUNDLE_NAME --sign "$installer_signature" --scripts Scripts --version 1.0 $PACKAGE_NAME
 	pkgutil --check-signature ./${PACKAGE_NAME}
