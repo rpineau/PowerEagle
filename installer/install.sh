@@ -34,12 +34,14 @@ fi
 
 cp "./powercontrollist PowerEagle.txt" "$TheSkyX_Path/Resources/Common/Miscellaneous Files/"
 cp "./PowerEagle.ui" "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/PowerControlPlugIns/"
+cp "./PrimaLuceLab_2.png" "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/PowerControlPlugIns/"
 cp "./libPowerEagle.so" "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/PowerControlPlugIns/"
 
 app_owner=`/usr/bin/stat -c "%u" "$TheSkyX_Path" | xargs id -n -u`
 if [ ! -z "$app_owner" ]; then
 	chown $app_owner "$TheSkyX_Path/Resources/Common/Miscellaneous Files/powercontrollist PowerEagle.txt"
 	chown $app_owner "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/PowerControlPlugIns/PowerEagle.ui"
+	chown $app_owner "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/PowerControlPlugIns/PrimaLuceLab_2.png"
 	chown $app_owner "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/PowerControlPlugIns/libPowerEagle.so"
 fi
 chmod  755 "$TheSkyX_Path/Resources/Common/$PLUGINS_DIR/PowerControlPlugIns/libPowerEagle.so"

@@ -9,7 +9,8 @@ fi
 
 mkdir -p ROOT/tmp/PowerEagle_X2/
 cp "../PowerEagle.ui" ROOT/tmp/PowerEagle_X2/
-cp "../focuserlist PowerEagle.txt" ROOT/tmp/PowerEagle_X2/
+cp "../PrimaLuceLab_2.png" ROOT/tmp/PowerEagle_X2/
+cp "../powercontrollist PowerEagle.txt" ROOT/tmp/PowerEagle_X2/
 cp "../build/Release/libPowerEagle.dylib" ROOT/tmp/PowerEagle_X2/
 
 f [ ! -z "$installer_signature" ]; then
