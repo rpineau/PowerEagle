@@ -2,7 +2,7 @@
 
 extern "C" PlugInExport int sbPlugInName2(BasicStringInterface& str)
 {
-	str = "Primaluce Lab Eagle series power Plug In";
+	str = "PrimaLuceLab Eagle series power Plug In";
 
 	return 0;
 }

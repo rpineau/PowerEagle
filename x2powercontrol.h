@@ -31,12 +31,9 @@ class CircuitLabelsInterface;
 #define CHILD_KEY_IP    "IPAddress"
 #define CHILD_KEY_PORT  "IPPort"
 
-#define CHILD_KEY_PWM_PORT6 "PWM_DUTY_6"
-#define CHILD_KEY_PWM_PORT7 "PWM_DUTY_7"
-#define CHILD_KEY_PORT1_NAME "PORT1_NAME"
-#define CHILD_KEY_PORT2_NAME "PORT2_NAME"
-#define CHILD_KEY_PORT3_NAME "PORT3_NAME"
-#define CHILD_KEY_PORT4_NAME "PORT4_NAME"
+#define CHILD_KEY_REGPORT5_V "REGPORT5_V"
+#define CHILD_KEY_REGPORT6_V "REGPORT6_V"
+#define CHILD_KEY_REGPORT7_V "REGPORT7_V"
 
  class X2PowerControl : public PowerControlDriverInterface, public ModalSettingsDialogInterface, public X2GUIEventInterface, public CircuitLabelsInterface, public SetCircuitLabelsInterface
 {

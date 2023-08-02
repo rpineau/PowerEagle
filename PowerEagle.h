@@ -51,7 +51,7 @@ using json = nlohmann::json;
 
 #define PLUGIN_DEBUG 3
 
-#define NB_PORTS 8 // 4 pwr, 4 usb, the 3 regulated can't be turned off
+#define NB_PORTS 11 // 4 pwr, 4 usb,  3 regulated 
 
 // error codes
 enum WeatherEagleErrors {PLUGIN_OK=0, NOT_CONNECTED, CANT_CONNECT, BAD_CMD_RESPONSE, COMMAND_FAILED, COMMAND_TIMEOUT, PARSE_FAILED};
@@ -80,8 +80,10 @@ public:
     int     setPwrHub(int nIndex, bool bOn);
     int     setPwrHubLabel(int nIndex, std::string sLabel);
 
-    int     getRegOut(int nIndex, double &dVolts, double &dCurrent, double &dPower, std::string &sLabel);
-    int     setRegOut(int nIndex, double dVolts);
+    int     getRegOut(int nIndex, double &dVolts, double &dCurrent, double &dPower, std::string &sLabel, bool &bOn);
+    void    setRegOutVal(int nIndex, double dVolts);
+    void    getRegOutVal(int nIndex, double &dVolts);
+    int     setRegOutOn(int nIndex,bool bOn);
     int     setRegOutLabel(int nIndex, std::string sLabel);
 
     int     getDarMode(bool &bOn);
@@ -111,6 +113,10 @@ protected:
 
     std::string     m_sIpAddress;
     int             m_nTcpPort;
+
+    double          m_dRegOut5_Volts;
+    double          m_dRegOut6_Volts;
+    double          m_dRegOut7_Volts;
 
     int             eagleEccoConnect();
 

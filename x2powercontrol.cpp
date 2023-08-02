@@ -12,6 +12,7 @@ X2PowerControl::X2PowerControl(const char* pszDisplayName,
 {
     char szIpAddress[128];
 	std::string sLabel;
+    double dVolts;
 
 	m_pTheSkyXForMounts = pTheSkyXIn;
 	m_pSleeper = pSleeperIn;
@@ -22,10 +23,20 @@ X2PowerControl::X2PowerControl(const char* pszDisplayName,
 	m_nISIndex = nInstanceIndex;
 
     if (m_pIniUtil) {
-        m_pIniUtil->readString(PARENT_KEY, CHILD_KEY_IP, "127.0.0.1", szIpAddress, 128);
+        m_pIniUtil->readString(PARENT_KEY, CHILD_KEY_IP, "localhost", szIpAddress, 128);
         m_PowerPorts.setIpAddress(std::string(szIpAddress));
         m_PowerPorts.setTcpPort(m_pIniUtil->readInt(PARENT_KEY, CHILD_KEY_PORT, 1380));
-	}
+
+        dVolts = m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_REGPORT5_V,3.0);
+        m_PowerPorts.setRegOutVal(5, dVolts);
+
+        dVolts = m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_REGPORT6_V,3.0);
+        m_PowerPorts.setRegOutVal(6, dVolts);
+
+        dVolts = m_pIniUtil->readDouble(PARENT_KEY, CHILD_KEY_REGPORT7_V,3.0);
+        m_PowerPorts.setRegOutVal(7, dVolts);
+
+    }
 }
 
 X2PowerControl::~X2PowerControl()
@@ -71,7 +82,7 @@ bool X2PowerControl::isLinked() const
 
 void X2PowerControl::driverInfoDetailedInfo(BasicStringInterface& str) const
 {
-    str = "Eagle Manager X";
+    str = "Eagle Manager X by Rodolphe Pineau";
 }
 
 double X2PowerControl::driverInfoVersion(void) const
@@ -117,12 +128,18 @@ int X2PowerControl::queryAbstraction(const char* pszName, void** ppVal)
 {
 	*ppVal = NULL;
 
-    if (!strcmp(pszName, ModalSettingsDialogInterface_Name))
+    if (!strcmp(pszName, LinkInterface_Name))
+        *ppVal = (LinkInterface*)this;
+
+    else if (!strcmp(pszName, ModalSettingsDialogInterface_Name))
         *ppVal = dynamic_cast<ModalSettingsDialogInterface*>(this);
+
     else if (!strcmp(pszName, X2GUIEventInterface_Name))
         *ppVal = dynamic_cast<X2GUIEventInterface*>(this);
+
     else if (!strcmp(pszName, CircuitLabelsInterface_Name))
         *ppVal = dynamic_cast<CircuitLabelsInterface*>(this);
+
     else if (!strcmp(pszName, SetCircuitLabelsInterface_Name))
         *ppVal = dynamic_cast<SetCircuitLabelsInterface*>(this);
 
@@ -143,6 +160,7 @@ int X2PowerControl::execModalSettingsDialog()
     double dPortPower;
     std::string sTmp;
     bool bDarkMode;
+    bool bOn;
     std::stringstream ssTmp;
     
     if (NULL == ui)
@@ -191,21 +209,24 @@ int X2PowerControl::execModalSettingsDialog()
         dx->setText("powerPort4", ssTmp.str().c_str());
 
         std::stringstream().swap(ssTmp);
-        nErr = m_PowerPorts.getRegOut(5, dPortVolts, dPortAmps, dPortPower, sTmp);
+        nErr = m_PowerPorts.getRegOut(5, dPortVolts, dPortAmps, dPortPower, sTmp, bOn);
         ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
         dx->setText("regPort1", ssTmp.str().c_str());
+        m_PowerPorts.getRegOutVal(5, dPortVolts);
         dx->setPropertyDouble("regPort1Volts", "value", dPortVolts);
         
         std::stringstream().swap(ssTmp);
-        nErr = m_PowerPorts.getRegOut(6, dPortVolts, dPortAmps, dPortPower, sTmp);
+        nErr = m_PowerPorts.getRegOut(6, dPortVolts, dPortAmps, dPortPower, sTmp, bOn);
         ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
         dx->setText("regPort2", ssTmp.str().c_str());
+        m_PowerPorts.getRegOutVal(6, dPortVolts);
         dx->setPropertyDouble("regPort2Volts", "value", dPortVolts);
 
         std::stringstream().swap(ssTmp);
-        nErr = m_PowerPorts.getRegOut(7, dPortVolts, dPortAmps, dPortPower, sTmp);
+        nErr = m_PowerPorts.getRegOut(7, dPortVolts, dPortAmps, dPortPower, sTmp, bOn);
         ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
         dx->setText("regPort3", ssTmp.str().c_str());
+        m_PowerPorts.getRegOutVal(7, dPortVolts);
         dx->setPropertyDouble("regPort3Volts", "value", dPortVolts);
 
     }
@@ -253,6 +274,7 @@ void X2PowerControl::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
     double dPortVolts;
     double dPortAmps;
     double dPortPower;
+    bool bOn;
     std::string sTmp;
     std::stringstream ssTmp;
 
@@ -285,17 +307,17 @@ void X2PowerControl::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
         uiex->setText("powerPort4", ssTmp.str().c_str());
 
         std::stringstream().swap(ssTmp);
-        nErr = m_PowerPorts.getRegOut(5, dPortVolts, dPortAmps, dPortPower, sTmp);
+        nErr = m_PowerPorts.getRegOut(5, dPortVolts, dPortAmps, dPortPower, sTmp, bOn);
         ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
         uiex->setText("regPort1", ssTmp.str().c_str());
         
         std::stringstream().swap(ssTmp);
-        nErr = m_PowerPorts.getRegOut(6, dPortVolts, dPortAmps, dPortPower, sTmp);
+        nErr = m_PowerPorts.getRegOut(6, dPortVolts, dPortAmps, dPortPower, sTmp, bOn);
         ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
         uiex->setText("regPort2", ssTmp.str().c_str());
 
         std::stringstream().swap(ssTmp);
-        nErr = m_PowerPorts.getRegOut(7, dPortVolts, dPortAmps, dPortPower, sTmp);
+        nErr = m_PowerPorts.getRegOut(7, dPortVolts, dPortAmps, dPortPower, sTmp, bOn);
         ssTmp << std::fixed << std::setprecision(1) << dPortVolts << " V / " << dPortAmps << " A / " << dPortPower << " W";
         uiex->setText("regPort3", ssTmp.str().c_str());
     }
@@ -303,16 +325,19 @@ void X2PowerControl::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 
     else if (!strcmp(pszEvent, "on_pushButton_3_clicked")) {
         uiex->propertyDouble("regPort1Volts", "value", dPortVolts);
-        nErr = m_PowerPorts.setRegOut(5, dPortVolts);
+        m_PowerPorts.setRegOutVal(5, dPortVolts);
+        m_pIniUtil->writeDouble(PARENT_KEY, CHILD_KEY_REGPORT5_V, dPortVolts);
     }
 
     else if (!strcmp(pszEvent, "on_pushButton_4_clicked")) {
         uiex->propertyDouble("regPort2Volts", "value", dPortVolts);
-        nErr = m_PowerPorts.setRegOut(6, dPortVolts);
+        m_PowerPorts.setRegOutVal(6, dPortVolts);
+        m_pIniUtil->writeDouble(PARENT_KEY, CHILD_KEY_REGPORT6_V, dPortVolts);
     }
     else if (!strcmp(pszEvent, "on_pushButton_5_clicked")) {
         uiex->propertyDouble("regPort3Volts", "value", dPortVolts);
-        nErr = m_PowerPorts.setRegOut(7, dPortVolts);
+        m_PowerPorts.setRegOutVal(7, dPortVolts);
+        m_pIniUtil->writeDouble(PARENT_KEY, CHILD_KEY_REGPORT7_V, dPortVolts);
     }
     
     else if (!strcmp(pszEvent, "on_radioButton_3_clicked")) {
@@ -326,7 +351,9 @@ void X2PowerControl::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 
 int X2PowerControl::numberOfCircuits(int& nNumber)
 {
-	return NB_PORTS;
+    m_PowerPorts.log("numberOfCircuits called");
+    nNumber = NB_PORTS;
+	return SB_OK;
 }
 
 int X2PowerControl::circuitState(const int& nIndex, bool& bZeroForOffOneForOn)
@@ -341,6 +368,9 @@ int X2PowerControl::circuitState(const int& nIndex, bool& bZeroForOffOneForOn)
 
     if(!m_bLinked)
         return ERR_NOLINK;
+
+    m_PowerPorts.log("circuitState called");
+
     switch(nIndex) {
             // power port <portidx>=1,2,3,4
         case 0:
@@ -384,6 +414,19 @@ int X2PowerControl::circuitState(const int& nIndex, bool& bZeroForOffOneForOn)
             nErr = m_PowerPorts.getPwrHub(nNewIndex, bOn, sLabel);
             bZeroForOffOneForOn = bOn;
             break;
+            // regulated ports 5,6,7
+        case 8:
+            nNewIndex = 5;
+            nErr = m_PowerPorts.getRegOut(nNewIndex, dVolts, dCurrent, dPower, sLabel, bZeroForOffOneForOn);
+            break;
+        case 9:
+            nNewIndex = 6;
+            nErr = m_PowerPorts.getRegOut(nNewIndex, dVolts, dCurrent, dPower, sLabel, bZeroForOffOneForOn);
+            break;
+        case 10:
+            nNewIndex = 7;
+            nErr = m_PowerPorts.getRegOut(nNewIndex, dVolts, dCurrent, dPower, sLabel, bZeroForOffOneForOn);
+            break;
         default :
             nErr = ERR_CMDFAILED;
     }
@@ -398,6 +441,8 @@ int X2PowerControl::setCircuitState(const int& nIndex, const bool& bZeroForOffOn
 
 	if(!m_bLinked)
         return ERR_NOLINK;
+
+    m_PowerPorts.log("setCircuitState called");
 
     switch(nIndex) {
             // power port <portidx>=1,2,3,4
@@ -434,6 +479,19 @@ int X2PowerControl::setCircuitState(const int& nIndex, const bool& bZeroForOffOn
             nNewIndex = 4;
             nErr =  m_PowerPorts.setPwrHub(nNewIndex, bZeroForOffOneForOn);
             break;
+            // regulated ports 5,6,7
+        case 8:
+            nNewIndex = 5;
+            nErr =  m_PowerPorts.setRegOutOn(nNewIndex, bZeroForOffOneForOn);
+            break;
+        case 9:
+            nNewIndex = 6;
+            nErr =  m_PowerPorts.setRegOutOn(nNewIndex, bZeroForOffOneForOn);
+            break;
+        case 10:
+            nNewIndex = 7;
+            nErr =  m_PowerPorts.setRegOutOn(nNewIndex, bZeroForOffOneForOn);
+            break;
         default :
             nErr = ERR_CMDFAILED;
 }
@@ -450,6 +508,8 @@ int X2PowerControl::circuitLabel(const int &nZeroBasedIndex, BasicStringInterfac
     double dPower;
     bool bOn;
     std::string sLabel;
+
+    m_PowerPorts.log("circuitLabel called");
 
     if(m_bLinked) {
         switch(nZeroBasedIndex) {
@@ -511,6 +571,8 @@ int X2PowerControl::setCircuitLabel(const int &nZeroBasedIndex, const char *str)
 {
     int nErr = SB_OK;
     int nNewIndex;
+
+    m_PowerPorts.log("setCircuitLabel called");
 
     if(m_bLinked) {
         switch(nZeroBasedIndex) {

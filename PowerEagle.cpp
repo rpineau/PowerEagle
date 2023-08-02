@@ -1,5 +1,5 @@
 //
-//  Primaluce Eagle power X2 plugin
+//  PrimaLuceLab Eagle power X2 plugin
 //
 //  Created by Rodolphe Pineau on 3/11/2020.
 
@@ -66,6 +66,9 @@ int CPowerEagle::Connect()
 {
     int nErr = SB_OK;
     std::string sDummy;
+    double dVolds, dCurrent, dPower;
+    bool bOn;
+    std::string slabel;
 
 #if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
     m_sLogFile << "["<<getTimeStamp()<<"]"<< " [Connect] Called." << std::endl;
@@ -99,6 +102,12 @@ int CPowerEagle::Connect()
         m_bIsConnected = false;
         return nErr;
     }
+
+    // this will update the internally cached value for the regulated port voltage if they are on
+    getRegOut(5, dVolds, dCurrent, dPower, slabel, bOn);
+    getRegOut(6, dVolds, dCurrent, dPower, slabel, bOn);
+    getRegOut(7, dVolds, dCurrent, dPower, slabel, bOn);
+
     return nErr;
 }
 
@@ -252,7 +261,7 @@ int CPowerEagle::getData()
                 jResp = json::parse(response_string);
                 if(jResp.at("result").get<std::string>() == "OK") {
                     m_sFirmware = jResp.at("firmwareversion").get<std::string>();
-                    m_sSerialNumber = jResp.at("firmwaserialnumberreversion").get<std::string>();
+                    m_sSerialNumber = jResp.at("serialnumber").get<std::string>();
                 }
                 else {
 #if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
@@ -492,7 +501,7 @@ int CPowerEagle::getPwrHub(int nIndex, bool &bOn, std::string &sLabel)
         try {
             jResp = json::parse(response_string);
             if(jResp.at("result").get<std::string>() == "OK") {
-                bOn = (jResp.at("power").get<int>()==1);
+                bOn = (jResp.at("status").get<int>()==1);
                 sLabel = jResp.at("label").get<std::string>();
             }
             else {
@@ -610,7 +619,7 @@ int CPowerEagle::setPwrHubLabel(int nIndex, std::string sLabel)
     return nErr;
 }
 
-int CPowerEagle::getRegOut(int nIndex, double &dVolts, double &dCurrent, double &dPower, std::string &sLabel)
+int CPowerEagle::getRegOut(int nIndex, double &dVolts, double &dCurrent, double &dPower, std::string &sLabel, bool &bOn)
 {
     int nErr = PLUGIN_OK;
     json jResp;
@@ -640,6 +649,7 @@ int CPowerEagle::getRegOut(int nIndex, double &dVolts, double &dCurrent, double 
                 dCurrent = jResp.at("current").get<std::double_t>();
                 dPower = jResp.at("power").get<std::double_t>();
                 sLabel = jResp.at("label").get<std::string>();
+                bOn = (dVolts<2.00)?false:true;
             }
             else {
 #if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
@@ -656,18 +666,81 @@ int CPowerEagle::getRegOut(int nIndex, double &dVolts, double &dCurrent, double 
 #endif
         }
     }
+    // set the voltage to what we read from the server if it's already on.
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getRegOut] caching voltage for port " << nIndex << " : " << dVolts << std::endl;
+    m_sLogFile.flush();
+#endif
+    switch(nIndex) {
+        case 5:
+            if(dVolts>2.00)
+                m_dRegOut5_Volts = dVolts;
+            break;
+        case 6:
+            if(dVolts>2.00)
+                m_dRegOut6_Volts = dVolts;
+            break;
+        case 7:
+            if(dVolts>2.00)
+                m_dRegOut5_Volts = dVolts;
+            break;
+    }
 
     return nErr;
 }
 
-int CPowerEagle::setRegOut(int nIndex, double dVolts)
+void CPowerEagle::setRegOutVal(int nIndex, double dVolts)
+{
+    if(dVolts<3)
+        dVolts = 3.0;
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setRegOutVal] caching voltage for port " << nIndex << " : " << dVolts << std::endl;
+    m_sLogFile.flush();
+#endif
+    switch(nIndex) {
+        case 5:
+            m_dRegOut5_Volts = dVolts;
+            break;
+        case 6:
+            m_dRegOut6_Volts = dVolts;
+            break;
+        case 7:
+            m_dRegOut5_Volts = dVolts;
+            break;
+    }
+}
+
+void CPowerEagle::getRegOutVal(int nIndex, double &dVolts)
+{
+    switch(nIndex) {
+        case 5:
+            dVolts = m_dRegOut5_Volts;
+            break;
+        case 6:
+            dVolts = m_dRegOut6_Volts;
+            break;
+        case 7:
+            dVolts = m_dRegOut7_Volts;
+            break;
+    }
+    if(dVolts<3)
+        dVolts = 3.0;
+
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getRegOutVal] cached voltage for port " << nIndex << " : " << dVolts << std::endl;
+    m_sLogFile.flush();
+#endif
+}
+
+int CPowerEagle::setRegOutOn(int nIndex, bool bOn)
 {
     int nErr = PLUGIN_OK;
     json jResp;
     std::string response_string;
     std::string PowerEagleError;
     std::stringstream ssTmp;
-    
+    double dVolts = 0;
+
     if(!m_bIsConnected || !m_Curl)
         return ERR_COMMNOLINK;
 
@@ -678,6 +751,19 @@ int CPowerEagle::setRegOut(int nIndex, double dVolts)
     // <rca_portidx>=5,6,7;
     if(nIndex<5 || nIndex>7)
         return ERR_INDEX_OUT_OF_RANGE;
+
+    switch(nIndex) {
+        case 5:
+            dVolts = bOn?m_dRegOut5_Volts:0 ;
+            break;
+        case 6:
+            dVolts = bOn?m_dRegOut5_Volts:0 ;
+            break;
+        case 7:
+            dVolts = bOn?m_dRegOut5_Volts:0 ;
+            break;
+    }
+
 
     ssTmp << "/setregout?idx=" << nIndex << "&volt=" << std::fixed << std::setprecision(1) << dVolts;
     nErr = doGET(ssTmp.str(), response_string);
@@ -771,18 +857,18 @@ int CPowerEagle::getDarMode(bool &bOn)
     m_sLogFile.flush();
 #endif
 
-
+    bDarkModeState = false;
     nErr = doGET("/getdarkmode", response_string);
     if(!nErr) {
         // process response_string
         try {
             jResp = json::parse(response_string);
-            if(jResp.at("result").get<std::string>() != "OK") {
+            if(jResp.at("result").get<std::string>() == "OK") {
                 bDarkModeState = jResp.at("darkModeActive").get<int>()==1?true:false;
             }
             else {
 #if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
-                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [isDarModeOn] getinfo error : " << jResp << std::endl;
+                m_sLogFile << "["<<getTimeStamp()<<"]"<< " [isDarModeOn] getdarkmode error : " << jResp << std::endl;
                 m_sLogFile.flush();
 #endif
             }
@@ -795,6 +881,11 @@ int CPowerEagle::getDarMode(bool &bOn)
 #endif
         }
     }
+
+#if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [isDarModeOn] DarMode : " << (bDarkModeState?"On":"Off") << std::endl;
+    m_sLogFile.flush();
+#endif
 
     return nErr;
 
