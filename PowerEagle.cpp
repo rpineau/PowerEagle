@@ -666,11 +666,16 @@ int CPowerEagle::getRegOut(int nIndex, double &dVolts, double &dCurrent, double 
 #endif
         }
     }
-    // set the voltage to what we read from the server if it's already on.
 #if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
+    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getRegOut] dVolts for port " << nIndex << " : " << dVolts << std::endl;
+    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getRegOut] dCurrent for port " << nIndex << " : " << dCurrent << std::endl;
+    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getRegOut] dPower for port " << nIndex << " : " << dPower << std::endl;
+    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getRegOut] sLabel for port " << nIndex << " : " << sLabel << std::endl;
+    m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getRegOut] bOn for port " << nIndex << " : " << (bOn?"Yes":"No") << std::endl;
     m_sLogFile << "["<<getTimeStamp()<<"]"<< " [getRegOut] caching voltage for port " << nIndex << " : " << dVolts << std::endl;
     m_sLogFile.flush();
 #endif
+    // set the voltage to what we read from the server if it's already on.
     switch(nIndex) {
         case 5:
             if(dVolts>2.00)
@@ -682,7 +687,7 @@ int CPowerEagle::getRegOut(int nIndex, double &dVolts, double &dCurrent, double 
             break;
         case 7:
             if(dVolts>2.00)
-                m_dRegOut5_Volts = dVolts;
+                m_dRegOut7_Volts = dVolts;
             break;
     }
 
@@ -691,21 +696,35 @@ int CPowerEagle::getRegOut(int nIndex, double &dVolts, double &dCurrent, double 
 
 void CPowerEagle::setRegOutVal(int nIndex, double dVolts)
 {
+    double dPortVolts;
+    double dPortAmps;
+    double dPortPower;
+    std::string sLabel;
+    bool bOn;
+
     if(dVolts<3)
         dVolts = 3.0;
 #if defined PLUGIN_DEBUG && PLUGIN_DEBUG >= 2
     m_sLogFile << "["<<getTimeStamp()<<"]"<< " [setRegOutVal] caching voltage for port " << nIndex << " : " << dVolts << std::endl;
     m_sLogFile.flush();
 #endif
+    getRegOut(nIndex, dPortVolts, dPortAmps, dPortPower, sLabel, bOn);
+
     switch(nIndex) {
         case 5:
             m_dRegOut5_Volts = dVolts;
+            if(bOn)
+                setRegOutOn(nIndex,bOn);
             break;
         case 6:
             m_dRegOut6_Volts = dVolts;
+            if(bOn)
+                setRegOutOn(nIndex,bOn);
             break;
         case 7:
-            m_dRegOut5_Volts = dVolts;
+            m_dRegOut7_Volts = dVolts;
+            if(bOn)
+                setRegOutOn(nIndex,bOn);
             break;
     }
 }
@@ -757,10 +776,10 @@ int CPowerEagle::setRegOutOn(int nIndex, bool bOn)
             dVolts = bOn?m_dRegOut5_Volts:0 ;
             break;
         case 6:
-            dVolts = bOn?m_dRegOut5_Volts:0 ;
+            dVolts = bOn?m_dRegOut6_Volts:0 ;
             break;
         case 7:
-            dVolts = bOn?m_dRegOut5_Volts:0 ;
+            dVolts = bOn?m_dRegOut7_Volts:0 ;
             break;
     }
 
@@ -886,7 +905,7 @@ int CPowerEagle::getDarMode(bool &bOn)
     m_sLogFile << "["<<getTimeStamp()<<"]"<< " [isDarModeOn] DarMode : " << (bDarkModeState?"On":"Off") << std::endl;
     m_sLogFile.flush();
 #endif
-
+    bOn = bDarkModeState;
     return nErr;
 
 }

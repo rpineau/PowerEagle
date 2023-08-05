@@ -351,7 +351,9 @@ void X2PowerControl::uiEvent(X2GUIExchangeInterface* uiex, const char* pszEvent)
 
 int X2PowerControl::numberOfCircuits(int& nNumber)
 {
+#if defined PLUGIN_DEBUG
     m_PowerPorts.log("numberOfCircuits called");
+#endif
     nNumber = NB_PORTS;
 	return SB_OK;
 }
@@ -368,9 +370,9 @@ int X2PowerControl::circuitState(const int& nIndex, bool& bZeroForOffOneForOn)
 
     if(!m_bLinked)
         return ERR_NOLINK;
-
+#if defined PLUGIN_DEBUG
     m_PowerPorts.log("circuitState called");
-
+#endif
     switch(nIndex) {
             // power port <portidx>=1,2,3,4
         case 0:
@@ -441,9 +443,9 @@ int X2PowerControl::setCircuitState(const int& nIndex, const bool& bZeroForOffOn
 
 	if(!m_bLinked)
         return ERR_NOLINK;
-
+#if defined PLUGIN_DEBUG
     m_PowerPorts.log("setCircuitState called");
-
+#endif
     switch(nIndex) {
             // power port <portidx>=1,2,3,4
         case 0:
@@ -509,8 +511,9 @@ int X2PowerControl::circuitLabel(const int &nZeroBasedIndex, BasicStringInterfac
     bool bOn;
     std::string sLabel;
 
+#if defined PLUGIN_DEBUG
     m_PowerPorts.log("circuitLabel called");
-
+#endif
     if(m_bLinked) {
         switch(nZeroBasedIndex) {
                 // power port <portidx>=1,2,3,4
@@ -553,6 +556,22 @@ int X2PowerControl::circuitLabel(const int &nZeroBasedIndex, BasicStringInterfac
             case 7:
                 nNewIndex = 4;
                 nErr = m_PowerPorts.getPwrHub(nNewIndex, bOn, sLabel);
+                str = sLabel.c_str();
+                break;
+                // regulated ports 5,6,7
+            case 8:
+                nNewIndex = 5;
+                nErr =  m_PowerPorts.getRegOut(nNewIndex, dVolts, dCurrent, dPower, sLabel, bOn);
+                str = sLabel.c_str();
+                break;
+            case 9:
+                nNewIndex = 6;
+                nErr =  m_PowerPorts.getRegOut(nNewIndex, dVolts, dCurrent, dPower, sLabel, bOn);
+                str = sLabel.c_str();
+                break;
+            case 10:
+                nNewIndex = 7;
+                nErr =  m_PowerPorts.getRegOut(nNewIndex, dVolts, dCurrent, dPower, sLabel, bOn);
                 str = sLabel.c_str();
                 break;
             default :
@@ -572,8 +591,9 @@ int X2PowerControl::setCircuitLabel(const int &nZeroBasedIndex, const char *str)
     int nErr = SB_OK;
     int nNewIndex;
 
+#if defined PLUGIN_DEBUG
     m_PowerPorts.log("setCircuitLabel called");
-
+#endif
     if(m_bLinked) {
         switch(nZeroBasedIndex) {
                 // power port <portidx>=1,2,3,4
@@ -609,6 +629,19 @@ int X2PowerControl::setCircuitLabel(const int &nZeroBasedIndex, const char *str)
             case 7:
                 nNewIndex = 4;
                 nErr = m_PowerPorts.setPwrHubLabel(nNewIndex, std::string(str));
+                break;
+                // regulated ports 5,6,7
+            case 8:
+                nNewIndex = 5;
+                nErr =  m_PowerPorts.setRegOutLabel(nNewIndex, std::string(str));
+                break;
+            case 9:
+                nNewIndex = 6;
+                nErr =  m_PowerPorts.setRegOutLabel(nNewIndex, std::string(str));
+                break;
+            case 10:
+                nNewIndex = 7;
+                nErr =  m_PowerPorts.setRegOutLabel(nNewIndex, std::string(str));
                 break;
             default :
                 nErr = ERR_CMDFAILED;

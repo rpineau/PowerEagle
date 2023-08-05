@@ -49,7 +49,7 @@ using json = nlohmann::json;
 
 #define PLUGIN_VERSION      1.0
 
-#define PLUGIN_DEBUG 3
+// #define PLUGIN_DEBUG 3
 
 #define NB_PORTS 11 // 4 pwr, 4 usb,  3 regulated 
 

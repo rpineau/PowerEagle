@@ -29,7 +29,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>Pegasus Pocket Power Box settings</string>
+   <string>Eagle series power control</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_12">
    <item>
